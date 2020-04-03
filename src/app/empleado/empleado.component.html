@@ -1,0 +1,204 @@
+<div class="container">
+  <table class="table" id="tablaDatos">
+    <thead>
+      <tr [ngClass]="{'dropup':orden.modo===1}">
+        <th>Id</th>
+        <th (click)="obtenerEmpleados('Nombre')">Nombre <i [ngClass]="{'dropdown-toggle':orden.campo==='Nombre'}"></i></th>
+        <th (click)="obtenerEmpleados('Apellido1')">Apellido 1 <i [ngClass]="{'dropdown-toggle':orden.campo==='Apellido1'}"></i></th>
+        <th (click)="obtenerEmpleados('Apellido2')">Apellido 2 <i [ngClass]="{'dropdown-toggle':orden.campo==='Apellido2'}"></i></th>
+        <th>Telefono 1</th>
+        <th>Telefono 2</th>
+        <th>Correo</th>
+        <th colspan="2" class="text-center">
+          <button class="btn btn-outline btn-success" (click)="nuevoEmpleado()"><i class="fa fa-plus"></i></button>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of empleados">
+        <td>{{item.id}}</td>
+        <td>{{item.Nombre}}</td>
+        <td>{{item.Apellido1}}</td>
+        <td>{{item.Apellido2}}</td>
+        <td>{{item.Telefono.tel1}}</td>
+        <td>{{item.Telefono.tel2}}</td>
+        <td>{{item.Correo}}</td>
+        <td class="text-center">
+          <button class="btn btn-outline btn-warning" (click)="editarEmpleado(item._id)"><i class="fa fa-pencil-alt"></i></button>
+        </td>
+        <td class="text-center">
+          <button class="btn btn-outline btn-danger" (click)="confirmarEliminarEmpleado(item)"><i class="fa fa-trash"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <nav aria-label="Page navigation example" class="d-flex justify-content-between">
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link" (click)="cambiarPagina(-1)" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <li class="page-item" [ngClass]="{'active':opc===pagina}" *ngFor="let opc of pags">
+        <a class="page-link" (click)="cambiarPagina(opc)" #color>{{opc}}</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" (click)="cambiarPagina(0)" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+    <button class="btn btn-primary" (click)="onImprimir()">Imprimir</button>
+  </nav>
+</div>
+
+<!--
+    <div class="container d-flex justify-content-end">
+      <button class="btn-primary">Imprimir</button>
+    </div>
+-->
+
+
+<!-- Ventana Empleado -->
+<!-- la clase modal en el div hace que no se vea el modal en pantalla hasta que haya un evento
+   
+     #ventanaEmpleado es para identificar un elemento en angular
+-->
+
+<!-- animated es para que reconozca el animate.css y fadeInDown es la animacion que quiero usar-->
+<div class="modal backdrop" tabindex="-1" role="dialog" name="ventanaEmpleado" #ventanaEmpleado style="overflow-y: auto;">
+  <div class="modal-dialog animated fadeInDown" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{tituloForm}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVentana(1)">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="frmEmpleado" name="frmEmpleado" id="frmEmpleado" (ngSubmit)="guardarEmpleado()">
+          <div class="row">
+            <div class="from-group col-6">
+              <label for="">Id</label>
+              <input type="text" formControlName="id" name="id" class="form-control" placeholder="Id">
+            </div>
+            <div class="from-group col-6">
+                <label for="">Usuario</label>
+                <input type="text" formControlName="idUsuario" name="idUsuario" class="form-control" placeholder="Usuario">
+            </div>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="errorDup">{{errorDup}}</div>
+
+          <label for="">Nombre</label>
+
+          <div class="row">
+            <div class="form-group col-4">
+              <input type="text" (keyup)="generarUsuario()" formControlName="Nombre" name="Nombre" class="form-control" placeholder="Nombre">
+            </div>
+
+            <div class="form-group col-4">
+              <input type="text" (keyup)="generarUsuario()" formControlName="Apellido1" name="Apellido1" class="form-control" placeholder="Apellido 1">
+            </div>
+
+            <div class="form-group col-4">
+              <input type="text" (keyup)="generarUsuario()" formControlName="Apellido2" name="Apellido2" class="form-control" placeholder="Apellido 2">
+            </div>
+          </div>
+
+          <!--  Validación del nombre-->
+          <div class="alert alert-danger" *ngIf="frmEmpleado.controls['Nombre'].invalid && frmEmpleado.controls['Nombre'].touched">
+            <div *ngIf="frmEmpleado.controls['Nombre'].errors['required']">
+              El campo nombre es requerido.
+            </div>
+            <div *ngIf="frmEmpleado.controls['Nombre'].errors['minlength']">
+              El nombre debe tener al menos 3 caracteres.
+            </div>
+            <div *ngIf="frmEmpleado.controls['Nombre'].errors['pattern']">
+              El nombre tiene caracteres no válidos.
+            </div>
+          </div>
+          
+          <!--  Validación del Apellido1-->
+          <div class="alert alert-danger" *ngIf="frmEmpleado.controls['Apellido1'].invalid && frmEmpleado.controls['Apellido1'].touched">
+              <div *ngIf="frmEmpleado.controls['Apellido1'].errors['required']">
+                El campo Apellido1 es requerido.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido1'].errors['minlength']">
+                El apellido 1 debe tener al menos 3 caracteres.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido1'].errors['pattern']">
+                El apellido 1 tiene caracteres no válidos.
+              </div>
+          </div>
+
+          <!--  Validación del Apellido2-->
+          <div class="alert alert-danger" *ngIf="frmEmpleado.controls['Apellido2'].invalid && frmEmpleado.controls['Apellido2'].touched">
+              <div *ngIf="frmEmpleado.controls['Apellido2'].errors['required']">
+                El campo Apellido2 es requerido.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido2'].errors['minlength']">
+                El apellido 2 debe tener al menos 3 caracteres.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido2'].errors['pattern']">
+                El apellido 2 tiene caracteres no válidos.
+              </div>
+          </div>
+
+
+          <label for="">Telefonos</label>
+
+          <div class="row">
+            <div class="form-group col-6">
+              <input type="text" formControlName="tel1" name="tel1" class="form-control" placeholder="Celular">
+            </div>
+
+            <div class="form-group col-6">
+              <input type="text" formControlName="tel2" name="tel2" class="form-control" placeholder="Casa">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="">Correo</label>
+            <input type="mail" formControlName="Correo" name="Correo" class="form-control" placeholder="Correo">
+          </div>
+
+          <div class="form-group">
+              <label for="">Dirección</label>
+              <input type="text" formControlName="Direccion" name="Direccion" class="form-control" placeholder="Dirección">
+          </div>
+
+          <input type="hidden" formControlName="funcion" name="funcion">
+          <input type="hidden" formControlName="_id" name="_id">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <!-- el atributo form es poeque el button no está dentro del formulario-->
+        <button type="submit" form="frmEmpleado" class="btn btn-primary" [disabled]="!frmEmpleado.valid">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cerrarVentana(1)">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VENTANA de confirmacion-->
+<div class="modal" tabindex="-1" role="dialog" name="ventanaConfirmar" #ventanaConfirmar>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVentana(2)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Eliminar Empleado.</p>
+          <p>{{empleado.Nombre}} {{empleado.Apellido1}} {{empleado.Apellido2}}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cerrarVentana(2)">Cerrar</button>
+          <button type="button" class="btn btn-primary" (click)="eliminarEmpleado()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,105 @@
+<div class="container">
+    <table class="table">
+      <thead>
+        <tr [ngClass]="{'dropup':orden.modo===1}">
+          <th>Id Familia</th>
+          <th (click)="obtenerFamilias('Nombre')">Nombre <i [ngClass]="{'dropdown-toggle':orden.campo==='Nombre'}"></i></th>
+          <th colspan="2" class="text-center">
+            <button class="btn btn-outline btn-success" (click)="nuevoFamilia()"><i class="fa fa-plus"></i></button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of familias">
+          <td>{{item.idFamilia}}</td>
+          <td>{{item.Nombre}}</td>
+          <td class="text-center">
+            <button class="btn btn-outline btn-warning" (click)="editarFamilia(item._id)"><i class="fa fa-pencil-alt"></i></button>
+          </td>
+          <td class="text-center">
+            <button class="btn btn-outline btn-danger" (click)="confirmarEliminarFamilia(item)"><i class="fa fa-trash"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        <li class="page-item">
+          <a class="page-link" (click)="cambiarPagina(-1)" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        <li class="page-item" [ngClass]="{'active':opc===pagina}" *ngFor="let opc of pags">
+          <a class="page-link" (click)="cambiarPagina(opc)" #color>{{opc}}</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" (click)="cambiarPagina(0)" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+
+  <!-- ////////////////////////////////////////////////////////////// -->
+
+
+  <div class="modal backdrop" tabindex="-1" role="dialog" name="ventanaFamilia" #ventanaFamilia>
+    <div class="modal-dialog animated fadeInDown" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{tituloForm}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVentana(1)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="frmFamilia" name="frmFamilia" id="frmFamilia" (ngSubmit)="guardarFamilia()">
+            <div class="row">
+              <div class="from-group col-6">
+                <label for="">Id Familia</label>
+                <input type="text" formControlName="idFamilia" name="idFamilia" class="form-control" placeholder="Id">
+              </div>
+              <div class="from-group col-6">
+                  <label for="">Nombre</label>
+                  <input type="text" formControlName="Nombre" name="Nombre" class="form-control" placeholder="Nombre">
+              </div>
+            </div>
+  
+            <div class="alert alert-danger" *ngIf="errorDup">{{errorDup}}</div>
+
+            <input type="hidden" formControlName="funcion" name="funcion">
+            <input type="hidden" formControlName="_id" name="_id">
+          </form>
+        </div>
+        <div class="modal-footer">
+          <!-- el atributo form es poeque el button no está dentro del formulario-->
+          <button type="submit" form="frmFamilia" class="btn btn-primary" [disabled]="!frmFamilia.valid">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cerrarVentana(1)">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- VENTANA de confirmacion-->
+  <div class="modal" tabindex="-1" role="dialog" name="ventanaConfirmar" #ventanaConfirmar>
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVentana(2)">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>Eliminar Familia.</p>
+            <p>{{familia.Nombre}}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cerrarVentana(2)">Cerrar</button>
+            <button type="button" class="btn btn-primary" (click)="eliminarFamilia()">Eliminar</button>
+          </div>
+        </div>
+      </div>
+    </div>

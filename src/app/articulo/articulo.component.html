@@ -1,0 +1,200 @@
+<div class="container">
+  <table class="table">
+    <thead>
+      <tr [ngClass]="{'dropup':orden.modo===1}">
+        <th>Código</th>
+        <th>Id Familia</th>
+        <th>IdProv 1</th>
+        <th>IdProv 2</th>
+        <th (click)="obtenerArticulos('Nombre')">Nombre <i [ngClass]="{'dropdown-toggle':orden.campo==='Nombre'}"></i></th>
+        <th (click)="obtenerArticulos('Precio')">Precio <i [ngClass]="{'dropdown-toggle':orden.campo==='Precio'}"></i></th>
+        <th (click)="obtenerArticulos('Stock')">Stock <i [ngClass]="{'dropdown-toggle':orden.campo==='Stock'}"></i></th>
+        <th>Min</th>
+        <th>Max</th>
+        <th colspan="2" class="text-center">
+          <button class="btn btn-outline btn-success" (click)="nuevoArticulo()"><i class="fa fa-plus"></i></button>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of articulos">
+        <td>{{item.codigo}}</td>
+        <td>{{item.idFamilia}}</td>
+        <td>{{item.idProveedor.idProv1}}</td>
+        <td>{{item.idProveedor.idProv1}}</td>
+        <td>{{item.Nombre}}</td>
+        <td>{{item.precio}}</td>
+        <td>{{item.stock}}</td>
+        <td>{{item.min}}</td>
+        <td>{{item.max}}</td>
+        <td class="text-center">
+          <button class="btn btn-outline btn-warning" (click)="editarArticulo(item._id)"><i class="fa fa-pencil-alt"></i></button>
+        </td>
+        <td class="text-center">
+          <button class="btn btn-outline btn-danger" (click)="confirmarEliminarArticulo(item)"><i class="fa fa-trash"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <nav aria-label="Page navigation example">
+    <ul class="pagination">
+      <li class="page-item">
+        <a class="page-link" (click)="cambiarPagina(-1)" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <li class="page-item" [ngClass]="{'active':opc===pagina}" *ngFor="let opc of pags">
+        <a class="page-link" (click)="cambiarPagina(opc)" #color>{{opc}}</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" (click)="cambiarPagina(0)" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+<!-- 
+//---------------------------------------------------------------------------------
+-->
+
+<div class="modal backdrop" tabindex="-1" role="dialog" name="ventanaArticulo" #ventanaArticulo>
+  <div class="modal-dialog animated fadeInDown" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{tituloForm}}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVentana(1)">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="frmArticulo" name="frmArticulo" id="frmArticulo" (ngSubmit)="guardarArticulo()">
+          <div class="row">
+            <div class="from-group col-6">
+              <label for="">Código</label>
+              <input type="text" formControlName="codigo" name="codigo" class="form-control" placeholder="Código">
+            </div>
+            <div class="from-group col-6">
+                <label for="">Id Familia</label>
+                <input type="text" formControlName="idFamilia" name="idFamilia" class="form-control" placeholder="Id Familia">
+            </div>
+          </div>
+
+          <div class="alert alert-danger" *ngIf="errorDup">{{errorDup}}</div>
+
+          <label for="">Id Proveedores</label>
+
+          <div class="row">
+            <div class="form-group col-6">
+              <input type="text" formControlName="idProv1" name="idProv1" class="form-control" placeholder="Id Proveedor 1">
+            </div>
+
+            <div class="form-group col-6">
+              <input type="text" formControlName="idProv2" name="idProv2" class="form-control" placeholder="Id Proveedor 2">
+            </div>
+          </div>
+
+          <!--  Validación del nombre
+          <div class="alert alert-danger" *ngIf="frmEmpleado.controls['Nombre'].invalid && frmEmpleado.controls['Nombre'].touched">
+            <div *ngIf="frmEmpleado.controls['Nombre'].errors['required']">
+              El campo nombre es requerido.
+            </div>
+            <div *ngIf="frmEmpleado.controls['Nombre'].errors['minlength']">
+              El nombre debe tener al menos 3 caracteres.
+            </div>
+            <div *ngIf="frmEmpleado.controls['Nombre'].errors['pattern']">
+              El nombre tiene caracteres no válidos.
+            </div>
+          </div>     -->
+          
+          <!--  Validación del Apellido1
+          <div class="alert alert-danger" *ngIf="frmEmpleado.controls['Apellido1'].invalid && frmEmpleado.controls['Apellido1'].touched">
+              <div *ngIf="frmEmpleado.controls['Apellido1'].errors['required']">
+                El campo Apellido1 es requerido.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido1'].errors['minlength']">
+                El apellido 1 debe tener al menos 3 caracteres.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido1'].errors['pattern']">
+                El apellido 1 tiene caracteres no válidos.
+              </div>
+          </div>     -->
+
+          <!--  Validación del Apellido2
+          <div class="alert alert-danger" *ngIf="frmEmpleado.controls['Apellido2'].invalid && frmEmpleado.controls['Apellido2'].touched">
+              <div *ngIf="frmEmpleado.controls['Apellido2'].errors['required']">
+                El campo Apellido2 es requerido.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido2'].errors['minlength']">
+                El apellido 2 debe tener al menos 3 caracteres.
+              </div>
+              <div *ngIf="frmEmpleado.controls['Apellido2'].errors['pattern']">
+                El apellido 2 tiene caracteres no válidos.
+              </div>
+          </div>   -->
+
+
+          <label for="">Nombre -- Precio</label>
+
+          <div class="row">
+            <div class="form-group col-6">
+              <input type="text" formControlName="Nombre" name="Nombre" class="form-control" placeholder="Nombre">
+            </div>
+
+            <div class="form-group col-6">
+              <input type="text" formControlName="precio" name="precio" class="form-control" placeholder="Precio">
+            </div>
+          </div>
+
+
+          <label for="">Detalle</label>
+
+          <div class="row">
+            <div class="form-group col-4">
+              <input type="text" formControlName="stock" name="stock" class="form-control" placeholder="Stock">
+            </div>
+
+            <div class="form-group col-4">
+              <input type="text" formControlName="min" name="min" class="form-control" placeholder="Min">
+            </div>
+
+            <div class="form-group col-4">
+              <input type="text" formControlName="max" name="max" class="form-control" placeholder="Max">
+            </div>
+          </div>          
+
+          <input type="hidden" formControlName="funcion" name="funcion">
+          <input type="hidden" formControlName="_id" name="_id">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <!-- el atributo form es poeque el button no está dentro del formulario-->
+        <button type="submit" form="frmArticulo" class="btn btn-primary" [disabled]="!frmArticulo.valid">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cerrarVentana(1)">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VENTANA de confirmacion-->
+<div class="modal" tabindex="-1" role="dialog" name="ventanaConfirmar" #ventanaConfirmar>
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="cerrarVentana(2)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Eliminar Articulo.</p>
+          <p>{{articulo.Nombre}}</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" (click)="cerrarVentana(2)">Cerrar</button>
+          <button type="button" class="btn btn-primary" (click)="eliminarArticulo()">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
